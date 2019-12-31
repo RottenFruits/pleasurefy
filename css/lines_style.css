@@ -1,0 +1,64 @@
+body
+    {
+        font-family: monospace;
+    }
+    .credits
+    {
+        font-size: 11px;
+        position: absolute;
+        bottom: 0;
+        left: 20px;
+        color: white;
+        text-align: left;
+    }
+    
+    .break {
+      display: none;
+    }
+    
+    p {
+      line-height: 1.2;
+    }
+    
+    .div-bar {
+      display: inline-block;
+    }
+    
+    #st_btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background: white;
+      color: black;
+      outline: none;
+      border: 0;
+      padding: 0 10px;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+    }
+    
+    .button-loading {
+      pointer-events: none;
+      opacity: .5;
+    }
+    
+    @media screen and (max-width: 600px) {
+        .credits
+        {
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+        .break {
+          display: block;
+        }
+        
+        .div-bar {
+          display: none;
+        }
+    }
+    
+    a
+    {
+        color: white;
+    }
