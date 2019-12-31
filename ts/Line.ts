@@ -6,7 +6,6 @@ export class Line {
     public width: number;
     public amp: number;
     public index: number;
-    public counter: number;
     public points: THREE.Vector3[];
 
     public geometry: THREE.Geometry;
@@ -28,19 +27,16 @@ export class Line {
         this.mesh = new THREE.Line(this.geometry, this.material);
         this.mesh.position.y = -20 + (y || 0);
         this.mesh.position.z = (8 - index) * -this.width || 0;
-        
-        this.counter = 0;    
     }
 
     public update(fftData: number[], index: number): void{
         const wave_updown_speed = 0.05;
 
-        // return
         if(!this.geometry.vertices) return;
     
         this.points = this.generatedPoints(fftData);
     
-        for (var i = this.geometry.vertices.length - 1; i >= 0; i--) {
+        for (let i = this.geometry.vertices.length - 1; i >= 0; i--) {
             this.geometry.vertices[i].y += (this.points[i].y - this.geometry.vertices[i].y) * wave_updown_speed;
         };
     
@@ -66,47 +62,44 @@ export class Line {
     public generatedPoints(fftData: number[]): THREE.Vector3[]{
         const both_side = 36;
 
-        var tmp = [];
+        let tmp = [];
         tmp.push(new THREE.Vector3(0, 0, 0));
         if(!fftData) return tmp;
 
-        var i;
-        var straightLines = pn.generatePerlinNoise(1, both_side);
-        for (i = straightLines.length - 1; i >= 0; i--) {
+        let straightLines = pn.generatePerlinNoise(1, both_side);
+        for (let i = straightLines.length - 1; i >= 0; i--) {
             straightLines[i] *= 10;
         };
         // console.log(fftData)
     
-        // var noise = perlin.generatePerlinNoise(1, 128);
-        var noise = [];
-        var order = this.index < 11 ? 10 - this.index : this.index;
+        // let noise = perlin.generatePerlinNoise(1, 128);
+        let noise = [];
+        const order = this.index < 11 ? 10 - this.index : this.index;
     
         // both side noise
-        var range = 512 / 8;
-        var start = range * (order % 11)
-        for (i = range + start; i >= start; i--) {
-            var a = fftData[i] / 5;
+        let range = 512 / 8;
+        let start = range * (order % 11)
+        for (let i = range + start; i >= start; i--) {
+            let a = fftData[i] / 5;
             a = a > 20 ? a * 1.5 : a / 50;
             a = Math.max(5, a);
             noise.push(a);
         };
     
         noise = straightLines.concat(noise);
-        var invertedPerlin = noise.slice(0);
+        let invertedPerlin = noise.slice(0);
         invertedPerlin = invertedPerlin.reverse();
         noise = noise.concat(invertedPerlin);
     
-        var spline = [];
-        i = 0;
-    
-        var ratio = this.size[0] / noise.length;
-    
+        let spline = [];
+        const ratio = this.size[0] / noise.length;
+        let i = 0;
         while(i < noise.length){
             spline.push(new THREE.Vector3( -this.size[0]/2 + (ratio * i), noise[i], 0 ) )
             i++;
         };
     
-        var curve = new THREE.CatmullRomCurve3(spline)
+        const curve = new THREE.CatmullRomCurve3(spline)
         return curve.getPoints(511);
     
         return spline
