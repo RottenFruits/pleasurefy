@@ -4,4 +4,4 @@ RUN mkdir app
 
 WORKDIR /app
 
-COPY 
+COPY app /app
