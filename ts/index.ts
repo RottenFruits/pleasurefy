@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 const Stats = require('stats-js');
 import {Line} from "./Line";
+import {Control} from "./Control";
 const WebAudioAnalyser = require('web-audio-analyser');
 const soundmanager = require('soundmanager2');
 
@@ -11,7 +12,8 @@ let lines: Line[];
 let renderer: THREE.WebGLRenderer; 
 let camera: THREE.PerspectiveCamera;
 let scene: THREE.Scene;
-let controls: OrbitControls;
+let camera_controls: OrbitControls;
+let controls: any;
 let stats: any;
 
 const wave_num = 22;
@@ -24,20 +26,19 @@ onResize();
 function init(): void{
   stats = initStats();
 
-  renderer = new THREE.WebGLRenderer( {
-      antialias : true
-  } );
-
+  renderer = new THREE.WebGLRenderer( {antialias : true});
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   document.body.appendChild(renderer.domElement);
 
   camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 4000);
-  camera.position.set(0, 350, -170);
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.maxDistance = 450;
+  camera.position.set(0, 276, -132);
+  camera_controls = new OrbitControls(camera, renderer.domElement);
+  camera_controls.maxDistance = 450;
 
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2( 0, 0.00155 );
+  scene.fog = new THREE.FogExp2(0, 0.00155);
+
+  controls = new Control(camera).initControls();
 
   soundManager.setup({
     onready: function() {
@@ -55,15 +56,6 @@ function initStats(): void{
     stats.domElement.style.top = '0px';
     document.getElementById("Stats-output")!.appendChild(stats.domElement);
     return stats;
-}
-
-function start(): void{
-  document.getElementById('st_btn')!.remove();
-  audioAnalyser = WebAudioAnalyser(audio._a);
-  audioAnalyser.analyser.fftSize = 4096;
-  createLines(wave_num, line_put_width);
-  shuffleLines(lines);
-  update();
 }
 
 function createLines(wave_num: number, line_put_width: number): void{
@@ -102,6 +94,15 @@ function update(): void{
   renderer.render(scene, camera);
 }
 
+function start(): void{
+  document.getElementById('st_btn')!.remove();
+  audioAnalyser = WebAudioAnalyser(audio._a);
+  audioAnalyser.analyser.fftSize = 4096;
+  createLines(wave_num, line_put_width);
+  shuffleLines(lines);
+  update();
+}
+
 function startClick(): void{
   audio = soundManager.createSound({
     id: 'music',
@@ -110,21 +111,14 @@ function startClick(): void{
   });
   audio.play();
 }
-
 const st_btn = document.getElementById('st_btn')!;
-const enum EventName {
-    LOAD = "load",
-    CLICK = "click",
-    MOUSE_MOVE = "mousemove",
-    RESIZE = "resize"
-}
-st_btn.addEventListener(EventName.CLICK, () => startClick());
+st_btn.addEventListener("click", () => startClick());
 
 function onResize(): void{
     renderer.setSize(window.innerWidth, window.innerHeight);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 }
-window.addEventListener(EventName.RESIZE, () => onResize());
+window.addEventListener("resize", () => onResize());
 
 
