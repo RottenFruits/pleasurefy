@@ -12,9 +12,12 @@ export class Line {
     public mesh: THREE.Line;
     public material: THREE.LineBasicMaterial;
 
-    constructor (y:number, width:number, amp:number, index: number, size: number[], fftData: number[]) {
+    public move_speed: number;
+
+    constructor (y:number, width:number, amp:number, move_speed:number, index: number, size: number[], fftData: number[]) {
         this.size = size;
         this.width = width;
+        this.move_speed = move_speed;
         this.amp = amp;
         this.index = index;
         this.points = this.generatedPoints(fftData);

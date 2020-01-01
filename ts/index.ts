@@ -38,7 +38,9 @@ function init(): void{
   scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0, 0.00155);
 
-  controls = new Control(camera).initControls();
+  lines = new Array(wave_num)
+
+  controls = new Control(camera, lines).initControls();
 
   soundManager.setup({
     onready: function() {
@@ -58,10 +60,11 @@ function initStats(): void{
     return stats;
 }
 
-function createLines(wave_num: number, line_put_width: number): void{
-  lines = new Array(wave_num)
+//function createLines(wave_num: number, line_put_width: number): void{
+function createLines(line_put_width: number): void{
+  //lines = new Array(wave_num)
   for (let i = lines.length - 1; i >= 0; i--) {
-    lines[i] = new Line(-SIZE[1]/2 + i*0, line_put_width, 50, i, SIZE, audioAnalyser.frequencies())
+    lines[i] = new Line(-SIZE[1]/2 + i*0, line_put_width, 50, 1, i, SIZE, audioAnalyser.frequencies())
     scene.add(lines[i].mesh);
   }  
 }
@@ -86,7 +89,7 @@ function update(): void{
   for (let i = 0; i < lines.length; i++) {
     if(lines[i]){
       lines[i].update(audioAnalyser.frequencies(), i);
-      lines[i].rotation(1, 1, -64, -64 + (wave_num - 1) * line_put_width);
+      lines[i].rotation(lines[i].move_speed, 1, -64, -64 + (wave_num - 1) * line_put_width);
     }
   }
   
@@ -98,7 +101,7 @@ function start(): void{
   document.getElementById('st_btn')!.remove();
   audioAnalyser = WebAudioAnalyser(audio._a);
   audioAnalyser.analyser.fftSize = 4096;
-  createLines(wave_num, line_put_width);
+  createLines(line_put_width);
   shuffleLines(lines);
   update();
 }
