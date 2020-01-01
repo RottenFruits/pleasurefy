@@ -1,5 +1,10 @@
 # pleasurefy
 
+## How to run
+
+```
+npm install 
+```
 
 
 ## References
