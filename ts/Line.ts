@@ -1,10 +1,60 @@
 import * as THREE from 'three';
 const pn = require('perlin-noise');
 
+export class Lines {
+    public lines: any;
+    public line_num: number;
+    public fft_size: number;
+    public line_put_width: number;
+    public size: number[];
+
+    constructor(line_num: number, line_put_width: number, fft_size: number, size: number[]){
+        this.line_num = line_num;
+        this.line_put_width = line_put_width;
+        this.fft_size = fft_size;
+        this.size = size;
+
+        this.lines = new Array(line_num)
+        for (let i = 0; i < this.line_num; i++) {
+            let initial_array = new Array(this.fft_size / 2);
+            let move_speed = 1;
+            let wave_updown_speed = 0.05;
+            this.lines[i] = new Line(line_put_width, move_speed, wave_updown_speed, i, size, initial_array)
+        }
+    }
+
+    public createLines(scene: any): void{
+        for (let i = 0; i < this.lines.length; i++) {
+          scene.add(this.lines[i].mesh);
+        }  
+      }
+      
+    public shuffleLines(): void{
+        for (let i = 0; i < this.lines.length; i++){
+            let rand = Math.floor(Math.random() * ( i + 1 ));
+            let tmp = this.lines[i].mesh.position.z
+            this.lines[i].mesh.position.z = this.lines[rand].mesh.position.z;
+            this.lines[rand].mesh.position.z = tmp;
+        }
+    }
+
+    public update(fftData: number[]): void{
+        for (let i = 0; i < this.lines.length; i++) {
+            this.lines[i].update(fftData, i);
+        }
+    }
+
+    public rotation(): void{
+        for (let i = 0; i < this.lines.length; i++) {
+            this.lines[i].rotation(this.lines[i].move_speed, 1, -64, -64 + (this.line_num - 1) * this.line_put_width);
+        }
+    }
+      
+}
+
 export class Line {
     public size: number[];
     public width: number;
-    public amp: number;
     public index: number;
     public points: THREE.Vector3[];
 
@@ -13,12 +63,13 @@ export class Line {
     public material: THREE.LineBasicMaterial;
 
     public move_speed: number;
+    public wave_updown_speed: number;
 
-    constructor (y:number, width:number, amp:number, move_speed:number, index: number, size: number[], fftData: number[]) {
+    constructor (width:number, move_speed:number, wave_updown_speed:number, index: number, size: number[], fftData: number[]) {
         this.size = size;
-        this.width = width;
+        this.width = width;        
         this.move_speed = move_speed;
-        this.amp = amp;
+        this.wave_updown_speed = wave_updown_speed;
         this.index = index;
         this.points = this.generatedPoints(fftData);
         
@@ -28,19 +79,18 @@ export class Line {
         this.material = new THREE.LineBasicMaterial({color: 0xFFFFFF, linewidth: 3});;
         
         this.mesh = new THREE.Line(this.geometry, this.material);
-        this.mesh.position.y = -20 + (y || 0);
+        const y = -this.size[1]/2 + index*0;
+        this.mesh.position.y = -20 + ( y || 0);
         this.mesh.position.z = (8 - index) * -this.width || 0;
     }
 
     public update(fftData: number[], index: number): void{
-        const wave_updown_speed = 0.05;
-
         if(!this.geometry.vertices) return;
     
         this.points = this.generatedPoints(fftData);
     
         for (let i = this.geometry.vertices.length - 1; i >= 0; i--) {
-            this.geometry.vertices[i].y += (this.points[i].y - this.geometry.vertices[i].y) * wave_updown_speed;
+            this.geometry.vertices[i].y += (this.points[i].y - this.geometry.vertices[i].y) * this.wave_updown_speed;
         };
     
         (this.mesh as any).geometry.verticesNeedUpdate = true;

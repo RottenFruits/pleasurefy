@@ -12,11 +12,13 @@ export class Control {
     }
     public initControls(): void{
         const gui = new dat.GUI();
+
         this.controls = {
             'setX':this.camera.position.x,
             'setY':this.camera.position.y,
             'setZ':this.camera.position.z,
-            'move_speed':1
+            'move_speed':this.lines[0].move_speed,
+            'wave_updown_speed':this.lines[0].wave_updown_speed
         };
     
         const Camera = gui.addFolder("Camera");
@@ -28,6 +30,11 @@ export class Control {
         Line.add(this.controls, 'move_speed', 0.1, 5).onChange((e) => {
             for(let i= 0; i < this.lines.length; i++){
                 this.lines[i].move_speed = e;
+            }
+        });
+        Line.add(this.controls, 'wave_updown_speed', 0.01, 1.0).onChange((e) => {
+            for(let i= 0; i < this.lines.length; i++){
+                this.lines[i].wave_updown_speed = e;
             }
         });
 

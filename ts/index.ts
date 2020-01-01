@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 const Stats = require('stats-js');
-import {Line} from "./Line";
+import {Lines} from "./Line";
 import {Control} from "./Control";
 const WebAudioAnalyser = require('web-audio-analyser');
 const soundmanager = require('soundmanager2');
 
 let audioAnalyser: any;
 let audio: any;
-let lines: Line[];
+let lines: Lines;
 let renderer: THREE.WebGLRenderer; 
 let camera: THREE.PerspectiveCamera;
 let scene: THREE.Scene;
@@ -18,6 +18,7 @@ let stats: any;
 
 const wave_num = 22;
 const line_put_width = 8;
+const fft_size = 4096;
 const SIZE = [Math.max(window.innerHeight, window.innerWidth) / 5, 30];
 
 init();
@@ -38,9 +39,9 @@ function init(): void{
   scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0, 0.00155);
 
-  lines = new Array(wave_num)
+  lines = new Lines(wave_num, line_put_width, fft_size, SIZE);
 
-  controls = new Control(camera, lines).initControls();
+  controls = new Control(camera, lines.lines).initControls();
 
   soundManager.setup({
     onready: function() {
@@ -51,31 +52,13 @@ function init(): void{
 }
 
 function initStats(): void{
-    const stats = new Stats();
-    stats.setMode(0); 
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '0px';
-    stats.domElement.style.top = '0px';
-    document.getElementById("Stats-output")!.appendChild(stats.domElement);
-    return stats;
-}
-
-//function createLines(wave_num: number, line_put_width: number): void{
-function createLines(line_put_width: number): void{
-  //lines = new Array(wave_num)
-  for (let i = lines.length - 1; i >= 0; i--) {
-    lines[i] = new Line(-SIZE[1]/2 + i*0, line_put_width, 50, 1, i, SIZE, audioAnalyser.frequencies())
-    scene.add(lines[i].mesh);
-  }  
-}
-
-function shuffleLines(lines: Line[]): void{
-  for (let i = lines.length - 1; i >= 0; i--){
-    let rand = Math.floor( Math.random() * ( i + 1 ) );
-    let tmp = lines[i].mesh.position.z
-    lines[i].mesh.position.z = lines[rand].mesh.position.z;
-    lines[rand].mesh.position.z = tmp;
-  }
+  const stats = new Stats();
+  stats.setMode(0); 
+  stats.domElement.style.position = 'absolute';
+  stats.domElement.style.left = '0px';
+  stats.domElement.style.top = '0px';
+  document.getElementById("Stats-output")!.appendChild(stats.domElement);
+  return stats;
 }
 
 function update(): void{
@@ -86,13 +69,9 @@ function update(): void{
     return;
   }
 
-  for (let i = 0; i < lines.length; i++) {
-    if(lines[i]){
-      lines[i].update(audioAnalyser.frequencies(), i);
-      lines[i].rotation(lines[i].move_speed, 1, -64, -64 + (wave_num - 1) * line_put_width);
-    }
-  }
-  
+  lines.update(audioAnalyser.frequencies());
+  lines.rotation();
+
   requestAnimationFrame(update);
   renderer.render(scene, camera);
 }
@@ -100,9 +79,9 @@ function update(): void{
 function start(): void{
   document.getElementById('st_btn')!.remove();
   audioAnalyser = WebAudioAnalyser(audio._a);
-  audioAnalyser.analyser.fftSize = 4096;
-  createLines(line_put_width);
-  shuffleLines(lines);
+  audioAnalyser.analyser.fftSize = fft_size;
+  lines.createLines(scene);
+  lines.shuffleLines();
   update();
 }
 
@@ -118,9 +97,9 @@ const st_btn = document.getElementById('st_btn')!;
 st_btn.addEventListener("click", () => startClick());
 
 function onResize(): void{
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
 }
 window.addEventListener("resize", () => onResize());
 
