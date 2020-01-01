@@ -16,6 +16,13 @@ docker run --rm -p 8090:8000 pleasurefy
 - access server
     - http://localhost:8090/
 
+## todo
+
+- write description
+- select music
+- start and stop
+- change line width
+
 ## References
 
 
