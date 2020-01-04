@@ -1,6 +1,6 @@
 # pleasurefy
 
-pleasurefy is music visualizer application that inspired by Joy Division's music album.
+pleasurefy is music visualizer application that inspired by Joy Division's [Unknown Pleasures](https://musicbrainz.org/release-group/42352def-1aab-3000-b548-895ebd869cb6).
 
 This application is refering to many parts of fluuuid's [lines](https://github.com/fluuuid/labs/tree/master/lines) repository.
 
@@ -30,6 +30,7 @@ docker run --rm -p 8090:8000 pleasurefy
 - select music
 - start and stop
 - change line width
+- low pass filter
 
 ## Music
 - [Dusty Noise - Rotten Fruits](https://corecorecords.bandcamp.com/album/miscellaneous)
