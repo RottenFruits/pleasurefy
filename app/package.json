@@ -8,8 +8,8 @@
     "build": "webpack",
     "start": "node server.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Rotten Fruits",
+  "license": "",
   "devDependencies": {
     "ts-loader": "^6.2.1",
     "typescript": "^3.7.4",

@@ -2,7 +2,12 @@
 
 pleasurefy is music visualizer application that inspired by Joy Division's music album.
 
+This application is refering to many parts of fluuuid's [lines](https://github.com/fluuuid/labs/tree/master/lines) repository.
+
 ![demo](https://github.com/RottenFruits/pleasurefy/blob/master/gif/g1.gif?raw=true)
+
+## Dependency
+- Docker
 
 ## How to run
 - clone
@@ -17,17 +22,18 @@ docker build -t pleasurefy .
 docker run --rm -p 8090:8000 pleasurefy
 ```
 
-- access server
+- open browser
     - http://localhost:8090/
 
 ## todo
 
-- write description
 - select music
 - start and stop
 - change line width
 
-## References
+## Music
+- [Dusty Noise - Rotten Fruits](https://corecorecords.bandcamp.com/album/miscellaneous)
 
+## References
 
 - [lines](https://labs.fluuu.id/lines/)
