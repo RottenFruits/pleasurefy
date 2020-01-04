@@ -29,7 +29,6 @@ docker run --rm -p 8090:8000 pleasurefy
 
 - select music
 - start and stop
-- change line width
 - low pass filter
 
 ## Music

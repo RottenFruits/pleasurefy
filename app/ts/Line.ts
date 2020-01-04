@@ -6,10 +6,12 @@ export class Lines {
     public line_num: number;
     public fft_size: number;
     public line_put_width: number;
+    public width: number;
     public size: number[];
 
-    constructor(line_num: number, line_put_width: number, fft_size: number, size: number[]){
+    constructor(line_num: number, width: number, line_put_width: number, fft_size: number, size: number[]){
         this.line_num = line_num;
+        this.width = width;
         this.line_put_width = line_put_width;
         this.fft_size = fft_size;
         this.size = size;
@@ -19,7 +21,7 @@ export class Lines {
             let initial_array = new Array(this.fft_size / 2);
             let move_speed = 1;
             let wave_updown_speed = 0.05;
-            this.lines[i] = new Line(line_put_width, move_speed, wave_updown_speed, i, size, initial_array)
+            this.lines[i] = new Line(width, line_put_width, move_speed, wave_updown_speed, i, size, initial_array)
         }
     }
 
@@ -55,77 +57,71 @@ export class Lines {
 export class Line {
     public size: number[];
     public width: number;
+    public line_put_width: number;
     public index: number;
-    public points: THREE.Vector3[];
+    public points: any;
+    public curve: any;
 
-    public geometry: THREE.Geometry;
-    public mesh: THREE.Line;
-    public material: THREE.LineBasicMaterial;
+    public geometry: any;
+    public mesh: any;
+    public material: any;
 
     public move_speed: number;
     public wave_updown_speed: number;
 
-    constructor (width:number, move_speed:number, wave_updown_speed:number, index: number, size: number[], fftData: number[]) {
+    constructor (width: number, line_put_width:number, move_speed:number, wave_updown_speed:number, index: number, size: number[], fftData: number[]) {
         this.size = size;
-        this.width = width;        
+        this.width = width;
+        this.line_put_width = line_put_width; //line put width       
         this.move_speed = move_speed;
         this.wave_updown_speed = wave_updown_speed;
         this.index = index;
-        this.points = this.generatedPoints(fftData);
+        this.curve = this.generatedCurve(fftData);
+        this.points = this.curve.getPoints(511);
         
-        this.geometry = new THREE.Geometry();
-        this.geometry.vertices = this.points;
-
-        this.material = new THREE.LineBasicMaterial({color: 0xFFFFFF, linewidth: 3});;
+        this.geometry = new THREE.TubeBufferGeometry(this.curve, 64, this.width, 8, false );
+        this.material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
         
-        this.mesh = new THREE.Line(this.geometry, this.material);
         const y = -this.size[1]/2 + index*0;
         this.mesh.position.y = -20 + ( y || 0);
-        this.mesh.position.z = (8 - index) * -this.width || 0;
+        this.mesh.position.z = (8 - index) * -this.line_put_width || 0;
     }
 
     public update(fftData: number[], index: number): void{
-        if(!this.geometry.vertices) return;
-    
-        this.points = this.generatedPoints(fftData);
-    
-        for (let i = this.geometry.vertices.length - 1; i >= 0; i--) {
-            this.geometry.vertices[i].y += (this.points[i].y - this.geometry.vertices[i].y) * this.wave_updown_speed;
-        };
-    
-        (this.mesh as any).geometry.verticesNeedUpdate = true;
+        let tmp_curve = this.generatedCurve(fftData);
+
+        //差分を足し合わせることでゆっくり動作させる
+        for (let i = this.curve.points.length - 1; i >= 0; i--) {
+            this.curve.points[i].y += (tmp_curve.points[i].y - this.curve.points[i].y) * this.wave_updown_speed
+        }
+        this.mesh.geometry = new THREE.TubeBufferGeometry(this.curve, 64, this.width, 8, false);
     }
 
     public rotation(speed: number, direction: number, min: number, max: number): void{
         if(direction){
             if(max < this.mesh.position.z){
-                this.mesh.position.z = min - this.width;
+                this.mesh.position.z = min - this.line_put_width;
             }else{
                 this.mesh.position.z += speed;
             }
         }else{
             if(this.mesh.position.z < min){
-                this.mesh.position.z = max + this.width;
+                this.mesh.position.z = max + this.line_put_width;
             }else{
                 this.mesh.position.z -= speed;
             }
         }
     }
 
-    public generatedPoints(fftData: number[]): THREE.Vector3[]{
+    public generatedCurve(fftData: number[]): THREE.CatmullRomCurve3{
         const both_side = 36;
-
-        let tmp = [];
-        tmp.push(new THREE.Vector3(0, 0, 0));
-        if(!fftData) return tmp;
 
         let straightLines = pn.generatePerlinNoise(1, both_side);
         for (let i = straightLines.length - 1; i >= 0; i--) {
             straightLines[i] *= 10;
         };
-        // console.log(fftData)
-    
-        // let noise = perlin.generatePerlinNoise(1, 128);
+
         let noise = [];
         const order = this.index < 11 ? 10 - this.index : this.index;
     
@@ -151,10 +147,9 @@ export class Line {
             spline.push(new THREE.Vector3( -this.size[0]/2 + (ratio * i), noise[i], 0 ) )
             i++;
         };
-    
+        
         const curve = new THREE.CatmullRomCurve3(spline)
-        return curve.getPoints(511);
-    
-        return spline
+        return curve;
     }
+
 }

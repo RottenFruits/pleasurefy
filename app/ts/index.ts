@@ -17,6 +17,7 @@ let controls: any;
 let stats: any;
 
 const wave_num = 22;
+const width = 2;
 const line_put_width = 8;
 const fft_size = 4096;
 const SIZE = [Math.max(window.innerHeight, window.innerWidth) / 5, 30];
@@ -39,7 +40,7 @@ function init(): void{
   scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0, 0.00155);
 
-  lines = new Lines(wave_num, line_put_width, fft_size, SIZE);
+  lines = new Lines(wave_num, width, line_put_width, fft_size, SIZE);
 
   controls = new Control(camera, lines.lines).initControls();
 
@@ -104,3 +105,18 @@ function onResize(): void{
 window.addEventListener("resize", () => onResize());
 
 
+
+export class CustomSinCurve {
+  public scale: number;
+
+  constructor(scale:number){
+    this.scale = scale;
+  }
+
+  public getPoint(t:number):THREE.Vector3 {
+    var tx = t * 3 - 1.5;
+    var ty = Math.sin( 2 * Math.PI * t );
+    var tz = 0;
+    return new THREE.Vector3( tx, ty, tz ).multiplyScalar(this.scale);
+  }
+}
