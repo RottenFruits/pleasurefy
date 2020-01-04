@@ -2,6 +2,8 @@
 
 pleasurefy is music visualizer application that inspired by Joy Division's music album.
 
+![demo](https://github.com/RottenFruits/pleasurefy/blob/master/gif/g1.gif?raw=true)
+
 ## How to run
 - clone
 ```
