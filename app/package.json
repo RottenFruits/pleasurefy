@@ -22,7 +22,7 @@
     "@types/soundmanager2": "^2.97.3",
     "@types/three": "^0.103.2",
     "dat.gui": "^0.7.6",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "perlin-noise": "0.0.1",
     "soundmanager2": "^2.97.20170602",
     "stats-js": "^1.0.1",
